@@ -11,7 +11,7 @@ public class Overseer {
      databaseConfigurator database = new databaseConfigurator();
      System.out.println("Successfully " + database.toString());
      try {
-    	 JDA jda = JDABuilder.createDefault("NjYzNTMzNzc3MjI5NzA5MzE0.XhJ5_A.onokgODTy267yySxdcDFuaOSHBQ")
+    	 JDA jda = JDABuilder.createDefault("insert token here")
     	            .addEventListeners(new MyListener()).build();
 		
 	//Guild enigma = api.getGuildById("589685961508651038");
