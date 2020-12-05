@@ -1,13 +1,14 @@
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.Duration;
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.util.Date;
+import java.time.Instant; //current time info, more versatile than offsetdatetime
+import java.time.OffsetDateTime; //what JDA uses for time
+import java.util.Date;  //paired with instant to make a date
 import java.util.HashMap;
 import java.util.List;
-
 import net.dv8tion.jda.api.JDA;
+
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Guild.Ban;
 import net.dv8tion.jda.api.entities.Member;
@@ -32,10 +33,13 @@ public class MyListener extends ListenerAdapter {
 	@Override
 	public void onMessageReceived(MessageReceivedEvent event) {
 		Instant startTime = Instant.now();
+		Timestamp ts = new Timestamp(startTime.toEpochMilli());
 		MessageChannel channel = event.getChannel();
 		Guild guild = event.getGuild();
 		JDA jda = guild.getJDA();
 		String msgContent = event.getMessage().getContentRaw();
+		//databaseConfigurator.insertInto(databaseConfigurator.FORKINSERT, );
+		
 		
 		if (event.getAuthor().getId().equals("245111504863494145") && msgContent.startsWith(prefix)) { // !event.getAuthor().isBot()
 			// &&
@@ -53,7 +57,7 @@ public class MyListener extends ListenerAdapter {
 				channel.sendMessage("Bot is up and running!").queue();
 				break;
 			case "selfDelete":
-
+					
 				break;
 			// -------------------------------------------------------BANS-------------------------------------------------------------------------\\
 			// -----------------------------------------------------banIgnoreCase--------------------------------------------------------------------------\\
@@ -178,7 +182,7 @@ public class MyListener extends ListenerAdapter {
 				break;
 			// -----------------------------------------------------Contact-------------------------------------------------------------------------\\
 			case "contact":
-				channel.sendMessage("Add dank#0149 on discord for more information\n +queryTimer(startTime) ").queue();
+				channel.sendMessage("Add dank#0149 on discord for more information\n" +queryTimer(startTime) ).queue();
 				break;
 				
 			case "unbanAll":

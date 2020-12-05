@@ -24,6 +24,9 @@ public class databaseConfigurator {
 	private String db_password;
 	private static Connection db;
 	private static Statement st;
+	public static final String FORKINSERT = "fork(date,uid,message)";
+	public static final String INFRACTIONINSERT = "infractions(uid,name,reason,date,issuedby,infractionpoints)";
+	public static final String ANALYTICINSERT = "analytics(date,memCount,membersIn,membersOut,netGain,messagesSent,banCount,moderations,notes)";
 	private Scanner in = new Scanner(System.in);
 
 	// private Instant startTime; for testing execution time
@@ -129,9 +132,8 @@ public class databaseConfigurator {
 				
 				
 				/*
-			 * endTime = Instant.now(); long duration = Duration.between(startTime,
-			 * endTime).toMillis(); System.out.println("executed in " + (duration) +
-			 * " milliseconds"); https://jdbc.postgresql.org/documentation/80/query.html
+			
+			 https://jdbc.postgresql.org/documentation/80/query.html
 			 * documentation, keep scrolling to see how to execute updates and what not
 			 */
 		} catch (SQLException e) {
@@ -221,5 +223,14 @@ public class databaseConfigurator {
 		reasons.add(columns.toString());
 		return new userObj(infractPts,infractionCount, reasons);
 	}
-
+	
+	public static void insertInto(String tableInsert,List<String> values) throws SQLException {
+		StringBuilder formatter = new StringBuilder();
+		for(String value:values) {
+			formatter.append("'" + value + "',"); //formats it so the list of arguments is surrounded by ' ' and separated by ,
+		}
+		databaseConfigurator.executeQuery("INSERT INTO " + tableInsert + " VALUES(" + formatter.toString() + ");");
+		
+		
+	}
 }
