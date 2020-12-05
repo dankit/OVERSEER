@@ -226,10 +226,25 @@ public class databaseConfigurator {
 	
 	public static void insertInto(String tableInsert,List<String> values) throws SQLException {
 		StringBuilder formatter = new StringBuilder();
-		for(String value:values) {
-			formatter.append("'" + value + "',"); //formats it so the list of arguments is surrounded by ' ' and separated by ,
+		for(int i=0;i<values.size();i++) { //formats it so the list of arguments is surrounded by ' ' and separated by ,
+			if(i<values.size()-1)
+			formatter.append("'" + values.get(i) + "',");
+			else{
+				formatter.append("'" + values.get(i) + "'"); 
+			}
 		}
+
 		databaseConfigurator.executeQuery("INSERT INTO " + tableInsert + " VALUES(" + formatter.toString() + ");");
+		
+		
+	}
+	public static List<String> forkValues(Timestamp date, String uid, String msg) {
+		List<String> a = new ArrayList<String>();
+		a.add(date.toString());
+		a.add(uid);
+		a.add(msg);
+		return a;
+		
 		
 		
 	}

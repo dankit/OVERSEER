@@ -38,7 +38,14 @@ public class MyListener extends ListenerAdapter {
 		Guild guild = event.getGuild();
 		JDA jda = guild.getJDA();
 		String msgContent = event.getMessage().getContentRaw();
-		//databaseConfigurator.insertInto(databaseConfigurator.FORKINSERT, );
+		String authorLong = event.getAuthor().getId();
+		
+		try {
+			databaseConfigurator.insertInto(databaseConfigurator.FORKINSERT,databaseConfigurator.forkValues(ts, authorLong, msgContent));
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		
 		
 		if (event.getAuthor().getId().equals("245111504863494145") && msgContent.startsWith(prefix)) { // !event.getAuthor().isBot()
