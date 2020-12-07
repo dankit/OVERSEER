@@ -130,12 +130,13 @@ public class databaseConfigurator {
 						+ "uid bigint NOT NULL," 
 						+ "message text NOT NULL);");
 				
-				
+				//"SET client_encoding TO 'UTF8';" in postgres if emojis are breaking the database
 				/*
 			
 			 https://jdbc.postgresql.org/documentation/80/query.html
 			 * documentation, keep scrolling to see how to execute updates and what not
 			 */
+				
 		} catch (SQLException e) {
 			if (e.getLocalizedMessage().contains("authentication failed")) {
 				System.out.print("Invalid password please try again, ");
@@ -191,7 +192,11 @@ public class databaseConfigurator {
 	public static ResultSet executeQuery(String query) throws SQLException {
 		return st.executeQuery(query);
 	}
-	public static userObj getInfractions(long uid, JDA jda, MessageChannel channel) throws SQLException{
+	
+	public static void executeUpdate(String query) throws SQLException { //for actions of INSERT,UPDATE,DELETE
+		st.executeUpdate(query);
+	}
+	public static userObj getInfractions(long uid, MessageChannel channel) throws SQLException{
 		ArrayList<String> reasons = new ArrayList<String>();
 		short infractPts = 0; //points in the database are smallint which is a short in java
 		int infractionCount = 0;
@@ -234,12 +239,12 @@ public class databaseConfigurator {
 			}
 		}
 
-		databaseConfigurator.executeQuery("INSERT INTO " + tableInsert + " VALUES(" + formatter.toString() + ");");
+		databaseConfigurator.executeUpdate("INSERT INTO " + tableInsert + " VALUES(" + formatter.toString() + ");");
 		
 		
 	}
 	public static List<String> forkValues(Timestamp date, String uid, String msg) {
-		List<String> a = new ArrayList<String>();
+		ArrayList<String> a = new ArrayList<String>();
 		a.add(date.toString());
 		a.add(uid);
 		a.add(msg);
@@ -247,5 +252,17 @@ public class databaseConfigurator {
 		
 		
 		
+	}
+	public static void forkQuery(String msgSplice,MessageChannel channel) throws SQLException {
+		String query = "SELECT message FROM fork WHERE uid = " + msgSplice +";";
+		System.out.println(query);
+		ResultSet rs = databaseConfigurator.executeQuery(query);
+		StringBuilder messageQueue = new StringBuilder(">>> "); 
+		while(rs.next()) {
+			messageQueue.append(rs.getString("message") + "\n");
+		}
+		channel.sendMessage(messageQueue.toString()).queue();
+		messageQueue.setLength(0);
+		rs.close();
 	}
 }

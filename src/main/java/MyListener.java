@@ -27,8 +27,8 @@ public class MyListener extends ListenerAdapter {
  * 
  * Please note the code is currently in the process of being refactored to better 
  * deal with each specific use case, to allow for more modularity and cleaner code
- * 
- * 
+ * Todo: surround the code as a whole with try/catch, each exception is not unique to a certain command
+ *       e.g. numberformatexception is invalid id, arrayoutofbounds is because of invalid arguments
  */
 	@Override
 	public void onMessageReceived(MessageReceivedEvent event) {
@@ -37,18 +37,19 @@ public class MyListener extends ListenerAdapter {
 		MessageChannel channel = event.getChannel();
 		Guild guild = event.getGuild();
 		JDA jda = guild.getJDA();
-		String msgContent = event.getMessage().getContentRaw();
+		String msgContent = event.getMessage().getContentRaw().replaceAll("'", "''");
 		String authorLong = event.getAuthor().getId();
 		
 		try {
-			databaseConfigurator.insertInto(databaseConfigurator.FORKINSERT,databaseConfigurator.forkValues(ts, authorLong, msgContent));
+			if(!event.getAuthor().isBot()) {
+			databaseConfigurator.insertInto(databaseConfigurator.FORKINSERT,databaseConfigurator.forkValues(ts, authorLong, msgContent));}
 		} catch (SQLException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		
 		
-		if (event.getAuthor().getId().equals("245111504863494145") && msgContent.startsWith(prefix)) { // !event.getAuthor().isBot()
+		if (event.getAuthor().getId().equals("245111504863494145") && msgContent.startsWith(prefix) && !event.getAuthor().isBot()) { // !event.getAuthor().isBot()
 			// &&
 			// We don't want to respond to other bot accounts, including ourself
 			if (prefix.length() > 1) {
@@ -81,7 +82,7 @@ public class MyListener extends ListenerAdapter {
 					channel.sendMessage(counter + "/" + bannable.size()
 							+ " members have been banned with case ignored name '" + username + "'\n" + queryTimer(startTime)).queue();
 				} else {
-					channel.sendMessage("Invalid argument list provided, format is '[prefix]banIgnoreCase <String>'")
+					channel.sendMessage("Invalid argument list provided, format is '[prefix]banIgnoreCase <String>'")       
 							.queue();
 				}
 				break;
@@ -198,6 +199,14 @@ public class MyListener extends ListenerAdapter {
 				
 				break;
 			// -----------------------------------------------------Infractions-------------------------------------------------------------------------\\
+			case "getMessages":
+				try {
+					databaseConfigurator.forkQuery(msgSplice[1], channel);
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				break;
 			case "infract":
 				userObj userData;
 				if (msgSplice.length > 1 && (msgSplice[1].length() == 18 || msgSplice[1].length() == 17)) {//17&18 = length of user id
@@ -210,7 +219,7 @@ public class MyListener extends ListenerAdapter {
 							}
 						}
 						else {
-							userData = databaseConfigurator.getInfractions(uid, jda, channel); // only sets infraction points, infraction count, and reasons
+							userData = databaseConfigurator.getInfractions(uid, channel); // only sets infraction points, infraction count, and reasons
 							userData.setTag(jda.getUserById(uid).getAsTag());
 							userData.setDateJoined(convertToDate(guild.getMemberById(uid).getTimeJoined()));
 							for(String reason:userData.getReasons()) {
