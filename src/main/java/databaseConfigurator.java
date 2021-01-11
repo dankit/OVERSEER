@@ -6,9 +6,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-
-import net.dv8tion.jda.api.JDA;
-
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
@@ -24,9 +21,10 @@ public class databaseConfigurator {
 	private String db_password;
 	private static Connection db;
 	private static Statement st;
-	public static final String FORKINSERT = "fork(date,uid,message)";
-	public static final String INFRACTIONINSERT = "infractions(uid,name,reason,date,issuedby,infractionpoints)";
-	public static final String ANALYTICINSERT = "analytics(date,memCount,membersIn,membersOut,netGain,messagesSent,banCount,moderations,notes)";
+	public static final String FORK = "fork(date,uid,message)";
+	public static final String INFRACTION = "infractions(uid,name,reason,date,issuedby,infractionpoints)";
+	public static final String ANALYTIC = "analytics(date,memCount,membersIn,membersOut,netGain,messagesSent,banCount,moderations,notes)";
+	public static final String ACTIONLOG = "actionlog(date,uid,authorTag,action,uid2,uid2Tag)";
 	private Scanner in = new Scanner(System.in);
 
 	// private Instant startTime; for testing execution time
@@ -129,6 +127,14 @@ public class databaseConfigurator {
 						+ "date timestamptz NOT NULL,"
 						+ "uid bigint NOT NULL," 
 						+ "message text NOT NULL);");
+				
+				st.execute("CREATE TABLE IF NOT EXISTS actionlog("
+						+ "date timestamptz NOT NULL,"
+						+ "uid bigint NOT NULL,"
+						+ "authorTag varchar(37) NOT NULL,"
+						+ "action text NOT NULL,"
+						+ "uid2 bigint,"
+						+ "uid2Tag varchar(37));");
 				
 				//"SET client_encoding TO 'UTF8';" in postgres if emojis are breaking the database
 				/*
@@ -244,14 +250,22 @@ public class databaseConfigurator {
 		
 	}
 	public static List<String> forkValues(Timestamp date, String uid, String msg) {
-		ArrayList<String> a = new ArrayList<String>();
-		a.add(date.toString());
-		a.add(uid);
-		a.add(msg);
-		return a;
-		
-		
-		
+		ArrayList<String> values = new ArrayList<String>();
+		values.add(date.toString());
+		values.add(uid);
+		values.add(msg);
+		return values;
+			
+	}
+	public static List<String> actionLogValues(Timestamp date, String uid, String authorTag, String action, String uid2, String uid2Tag){
+		ArrayList<String> values = new ArrayList<String>();
+		values.add(date.toString());
+		values.add(uid);
+		values.add(authorTag);
+		values.add(action);
+		values.add(uid2);
+		values.add(uid2Tag);
+		return values;
 	}
 	public static void forkQuery(String msgSplice,MessageChannel channel) throws SQLException {
 		String query = "SELECT message FROM fork WHERE uid = " + msgSplice +";";
