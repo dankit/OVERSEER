@@ -231,7 +231,7 @@ public class MyListener extends ListenerAdapter {
 
 	@Override
 	public void onGuildMemberJoin(GuildMemberJoinEvent event) {
-		if (event.getUser().getId().equals("386975791889645571")) {
+		if (event.getUser().getId().equals("omitted")) {
 			event.getGuild().getTextChannelById("785300961396654120")
 					.sendMessage("<@245111504863494145> watchlisted user has joined the guild").queue();
 

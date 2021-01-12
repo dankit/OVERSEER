@@ -24,25 +24,12 @@ public class AntiNuke extends ListenerAdapter {
 	 *read about each specific one here
 	 * 
 	 * onTextChannelCreate​(TextChannelCreateEvent event)
-	 * onRoleCreate​(RoleCreateEvent event) onRoleDelete​(RoleDeleteEvent event)
-	 * onRoleUpdatePermissions​(RoleUpdatePermissionsEvent event)
-	 * onGuildBan​(GuildBanEvent event) public void onGuildUnban​(@Nonnull
-	 * GuildUnbanEvent event) onGuildMemberLeave​(GuildMemberLeaveEvent event)
-	 * onGuildMemberRemove​(GuildMemberRemoveEvent event)
-	 * onGuildMessageDelete​(GuildMessageDeleteEvent event)/onMessageDelete ​
-	 * onGuildUpdateName​(GuildUpdateNameEvent event)
-	 * onTextChannelUpdatePermissions​(TextChannelUpdatePermissionsEvent event)
-	 * 
-	 * onTextChannelUpdateSlowmode​(TextChannelUpdateSlowmodeEvent event)
-	 * onRoleUpdateName​(RoleUpdateNameEvent event) public void
-	 * onMessageUpdate​(@Nonnull MessageUpdateEvent event) public void
-	 * onMessageBulkDelete​(@Nonnull MessageBulkDeleteEvent event) public void
-	 * onGuildUpdateName​(@Nonnull GuildUpdateNameEvent event) public void
-	 * onGuildUpdateRegion​(@Nonnull GuildUpdateRegionEvent event) public void
-	 * onGuildUpdateVerificationLevel​(GuildUpdateVerificationLevelEvent event)
-	 * 
-	 * 
 	 */
+	
+	
+	//idea -> make !banMessageSent <String>
+	//pulls uids for all members who have sent a message of <String> in the past 5-10 minutes (using date functions)
+	//then ban all the members
 	public void onTextChannelDelete​(TextChannelDeleteEvent event) {
 
 	}
