@@ -57,34 +57,14 @@ public class MyListener extends ListenerAdapter {
 
 					break;
 				// -------------------------------------------------------BANS-------------------------------------------------------------------------\\
-				// -----------------------------------------------------banIgnoreCase--------------------------------------------------------------------------\\
-				case "banIgnoreCase": {
-					int counter = 0;
-					if (msgSplice.length > 1) { // checking if the command has an argument is quicker than manipulating
-												// the
-												// string
-						String username = msgFixed.replace("banIgnoreCase ", "");
-						List<Member> bannable = guild.getMembersByName(username, true);
-						for (Member member : bannable) {
-							guild.ban(member, 7).queue();
-							counter++;
-						}
-						channel.sendMessage(
-								counter + "/" + bannable.size() + " members have been banned with case ignored name '"
-										+ username + "'\n" + queryTimer(startTime))
-								.queue();
-					} else {
-						channel.sendMessage(
-								"Invalid argument list provided, format is '[prefix]banIgnoreCase <String>'").queue();
-					}
-					break;
-				}
+				
 				// ---------------------------------------------------------banMatchCase-----------------------------------------------------------------------\\
 				case "banMatchCase": {
-					if (msgSplice.length > 1) {
+					if (msgSplice.length > 2) {
 						String username = msgFixed.replace("banMatchCase ", "");
 						int counter = 0;
-						List<Member> bannable = guild.getMembersByName(username, false);
+						boolean matchCase = Boolean.valueOf(msgSplice[1]);
+						List<Member> bannable = guild.getMembersByName(username, matchCase);
 						for (Member members : bannable) {
 							guild.ban(members, 7).queue();
 							counter++;
@@ -94,7 +74,7 @@ public class MyListener extends ListenerAdapter {
 										+ username + "'\n" + queryTimer(startTime))
 								.queue();
 					} else {
-						channel.sendMessage("Invalid argument list provided, format is '[prefix]banMatchCase <String>'")
+						channel.sendMessage("Invalid argument list provided, format is '[prefix]banMatchCase <true/false> <string>'")
 								.queue();
 					}
 					break;
@@ -257,30 +237,7 @@ public class MyListener extends ListenerAdapter {
 
 		}
 	}
-	/*
-	 * https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/events/
-	 * GenericEvent.html read about each specific one here
-	 * onTextChannelDelete​(TextChannelDeleteEvent event)
-	 * onTextChannelCreate​(TextChannelCreateEvent event)
-	 * onRoleCreate​(RoleCreateEvent event) onRoleDelete​(RoleDeleteEvent event)
-	 * onRoleUpdatePermissions​(RoleUpdatePermissionsEvent event)
-	 * onGuildBan​(GuildBanEvent event) public void onGuildUnban​(@Nonnull
-	 * GuildUnbanEvent event) onGuildMemberLeave​(GuildMemberLeaveEvent event)
-	 * onGuildMemberRemove​(GuildMemberRemoveEvent event)
-	 * onGuildMessageDelete​(GuildMessageDeleteEvent event)/onMessageDelete​
-	 * onGuildUpdateName​(GuildUpdateNameEvent event)
-	 * onTextChannelUpdatePermissions​(TextChannelUpdatePermissionsEvent event)
-	 * onTextChannelUpdateSlowmode​(TextChannelUpdateSlowmodeEvent event)
-	 * onRoleUpdateName​(RoleUpdateNameEvent event) public void
-	 * onMessageUpdate​(@Nonnull MessageUpdateEvent event) public void
-	 * onMessageBulkDelete​(@Nonnull MessageBulkDeleteEvent event) public void
-	 * onGuildUpdateName​(@Nonnull GuildUpdateNameEvent event) public void
-	 * onGuildUpdateRegion​(@Nonnull GuildUpdateRegionEvent event) public void
-	 * onGuildUpdateVerificationLevel​(@Nonnull GuildUpdateVerificationLevelEvent
-	 * event)
-	 * 
-	 * 
-	 */
+	
 
 	public static Date convertToDate(OffsetDateTime time) {
 		return new Date(time.toInstant().toEpochMilli());
