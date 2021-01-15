@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+
+import org.slf4j.LoggerFactory;
+
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
@@ -26,11 +29,11 @@ public class databaseConfigurator {
 	public static final String ANALYTIC = "analytics(date,memCount,membersIn,membersOut,netGain,messagesSent,banCount,moderations,notes)";
 	public static final String ACTIONLOG = "actionlog(date,uid,authorTag,action,uid2,uid2Tag)";
 	private Scanner in = new Scanner(System.in);
+	ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(databaseConfigurator.class);
 
 	// private Instant startTime; for testing execution time
 	// private Instant endTime;
 	public databaseConfigurator() {
-
 		BufferedReader br;
 		try {
 			br = new BufferedReader(new FileReader("setup.config"));
@@ -40,10 +43,10 @@ public class databaseConfigurator {
 		}
 
 		catch (FileNotFoundException ex) {
-
+				logger.info("file not found");
 			try {
 				FileWriter fileWriter = new FileWriter("setup.config", true); // true makes it so text is appended to
-																				// the file contents
+				logger.info("new file made");													// the file contents
 				boolean success = false;
 				while (!success) {
 					success = initializer(fileWriter);
@@ -56,12 +59,7 @@ public class databaseConfigurator {
 				// Connection db = DriverManager.getConnection(url, username, password);
 
 			} catch (IOException e) {
-				e.printStackTrace();
-				System.out.println("Problem creating/writing to the file...");
-				System.out.println(
-						"Can be caused if the file exists but is a directory rather than a regular file, or does not exist and cannot be created");
-				System.out.println(
-						"Or because it cannot be opened for any other reason (possible file access violated, lacking permissions)");
+				logger.error(e.getMessage() + "... Possible file access violation/lacking permissions");
 			}
 
 		} catch (IOException e) {
@@ -82,6 +80,7 @@ public class databaseConfigurator {
 		System.out.println("Enter username");
 		fileWriter.write("username: " + in.next() + "\n");
 		fileWriter.close(); // When you write data to a stream, it is not written immediately, and it is
+		logger.info("info written");
 		return true; // buffered for better performance
 						// So use flush() when you need to be sure that all your data from buffer is
 						// written. close() automatically flushes the stream.
@@ -94,6 +93,7 @@ public class databaseConfigurator {
 		db_username = br.readLine().substring(9).trim(); // username: xxxx
 		String credentials = "\nhost: " + db_host + "\nport: " + db_port
 			+ "\ndb_name: " + db_name + "\ndb_username " + db_username + "\n";
+		logger.debug(credentials);
 		br.close();
 		System.out.println("Enter database password");
 		db_password = in.next(); // rather not store password in clear text
@@ -111,7 +111,7 @@ public class databaseConfigurator {
 						+ "date timestamptz NOT NULL,"
 						+ "issuedBy varchar(37) NOT NULL,"
 						+ "infractionpoints smallint NOT NULL);");
-
+				logger.info("infractions table created");
 				st.execute("CREATE TABLE IF NOT EXISTS analytics("
 						+ "date timestamp NOT NULL,"
 						+ "memCount integer NOT NULL,"
@@ -122,12 +122,12 @@ public class databaseConfigurator {
 						+ "banCount integer NOT NULL,"
 						+ "moderations integer NOT NULL,"
 						+ "notes varchar(255));");
-				
+				logger.info("anayltics table created");
 				st.execute("CREATE TABLE IF NOT EXISTS fork("
 						+ "date timestamptz NOT NULL,"
 						+ "uid bigint NOT NULL," 
 						+ "message text NOT NULL);");
-				
+				logger.info("fork table created");
 				st.execute("CREATE TABLE IF NOT EXISTS actionlog("
 						+ "date timestamptz NOT NULL,"
 						+ "uid bigint NOT NULL,"
@@ -135,7 +135,7 @@ public class databaseConfigurator {
 						+ "action text NOT NULL,"
 						+ "uid2 bigint,"
 						+ "uid2Tag varchar(37));");
-				
+				logger.info("actionlog table created");
 				//"SET client_encoding TO 'UTF8';" in postgres if emojis are breaking the database
 				/*
 			
@@ -144,32 +144,12 @@ public class databaseConfigurator {
 			 */
 				
 		} catch (SQLException e) {
-			if (e.getLocalizedMessage().contains("authentication failed")) {
-				System.out.print("Invalid password please try again, ");
-				System.out.println(
-						"also make sure to check the setup.config file to ensure other credentials are correct");
-				System.out.println("You are using credentials: " + credentials);
-				databaseConnect(new BufferedReader(new FileReader("setup.config")));
-
-			} else {
-				System.out.println(e.getLocalizedMessage());
-				System.out.println(
-						"Error! Make sure your credentials/database is configured correctly.. Credentials are read from the setup.config file");
-				System.out.println("You are using credentials: " + credentials);
-				System.out.println("Now terminating process..");
-				try {
-					Thread.sleep(5000);
+			logger.error(e.getMessage() + "...\n credentials are read from setup.config, make sure information is correct");
 					System.exit(0);
-				} catch (InterruptedException e1) {
-					// TODO Auto-generated catch block
-					System.exit(0);
-
-				}
-
 			}
 		}
 
-	}
+	
 
 	public String getDatabaseName() {
 		return db_name;
