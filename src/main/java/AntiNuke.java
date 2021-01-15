@@ -1,4 +1,5 @@
 import net.dv8tion.jda.api.audit.ActionType;
+import net.dv8tion.jda.api.audit.AuditLogEntry;
 import net.dv8tion.jda.api.entities.PermissionOverride;
 import net.dv8tion.jda.api.events.channel.text.TextChannelCreateEvent;
 import net.dv8tion.jda.api.events.channel.text.TextChannelDeleteEvent;
@@ -26,24 +27,50 @@ public class AntiNuke extends ListenerAdapter {
 	 * onTextChannelCreate​(TextChannelCreateEvent event)
 	 */
 	
-	
+
 	//idea -> make !banMessageSent <String>
 	//pulls uids for all members who have sent a message of <String> in the past 5-10 minutes (using date functions)
 	//then ban all the members
-	public void onTextChannelDelete​(TextChannelDeleteEvent event) {
-
+	@Override
+	public void onTextChannelDelete(TextChannelDeleteEvent event) {
+		event.getGuild().retrieveAuditLogs().type(ActionType.CHANNEL_DELETE).limit(1).queue(
+				x -> {
+					if (x.isEmpty()) return;
+					AuditLogEntry entry = x.get(0);
+					event.getGuild().getTextChannelById("785300961396654120").sendMessage(String.format("Channel %s deleted by user %s (%s)",event.getChannel().getName(), entry.getUser().getAsTag(),entry.getUser().getId())).queue();
+				}
+				);
 	}
-
-	public void onTextChannelCreate​(TextChannelCreateEvent event) {
-
+	@Override
+	public void onTextChannelCreate(TextChannelCreateEvent event){
+		event.getGuild().retrieveAuditLogs().type(ActionType.CHANNEL_CREATE).limit(1).queue(
+				x -> {
+					if (x.isEmpty()) return;
+					AuditLogEntry entry = x.get(0);
+					event.getGuild().getTextChannelById("785300961396654120").sendMessage(String.format("Channel %s created by user %s (%s)",event.getChannel().getName(), entry.getUser().getAsTag(),entry.getUser().getId())).queue();
+				}
+				);
 	}
-
-	public void onRoleCreate​(RoleCreateEvent event) {
-
+	@Override
+	public void onRoleCreate(RoleCreateEvent event) {
+		event.getGuild().retrieveAuditLogs().type(ActionType.ROLE_CREATE).limit(1).queue(
+				x -> {
+					if (x.isEmpty()) return;
+					AuditLogEntry entry = x.get(0);
+					event.getGuild().getTextChannelById("785300961396654120").sendMessage(String.format("Role %s created by user %s (%s)",event.getRole().getName(), entry.getUser().getAsTag(),entry.getUser().getId())).queue();
+				}
+				);
 	}
-
-	public void onRoleDelete​(RoleDeleteEvent event) {
-//event.getGuild().retrieveAuditLogs().type(ActionType.BAN).queue
+	
+	@Override
+	public void onRoleDelete(RoleDeleteEvent event)  {
+		event.getGuild().retrieveAuditLogs().type(ActionType.ROLE_DELETE).limit(1).queue(
+				x -> {
+					if (x.isEmpty()) return;
+					AuditLogEntry entry = x.get(0);
+					event.getGuild().getTextChannelById("785300961396654120").sendMessage(String.format("Role %s deleted by user %s (%s)",event.getRole().getName(), entry.getUser().getAsTag(),entry.getUser().getId())).queue();
+				}
+				);
 	}
 
 	public void onRoleUpdatePermissions​(RoleUpdatePermissionsEvent event) {
