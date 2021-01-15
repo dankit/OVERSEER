@@ -1,13 +1,12 @@
-
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Duration;
-import java.time.Instant; //current time info, more versatile than offsetdatetime
+import java.time.Instant;
 import java.time.OffsetDateTime; //what JDA uses for time
 import java.util.Date; //paired with instant to make a date
 import java.util.HashMap;
 import java.util.List;
-
+import org.slf4j.LoggerFactory;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Guild.Ban;
 import net.dv8tion.jda.api.entities.Member;
@@ -19,14 +18,16 @@ import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.RestAction;
 
+
 public class MyListener extends ListenerAdapter {
+	ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(MyListener.class);
 	String prefix = "!!";
 	HashMap<Long, userObj> userMap = new HashMap<Long, userObj>();
 
 	@Override
 	public void onMessageReceived(MessageReceivedEvent event) {
-		Instant startTime = Instant.now();
-		Timestamp ts = new Timestamp(startTime.toEpochMilli());
+		Instant startTime = Instant.now(); //for things such as seeing how long a query took to execute
+		Timestamp ts = new Timestamp(startTime.toEpochMilli()); //for the date column in database
 		MessageChannel channel = event.getChannel();
 		Guild guild = event.getGuild();
 		String msgContent = event.getMessage().getContentRaw().replaceAll("'", "''");
@@ -41,13 +42,8 @@ public class MyListener extends ListenerAdapter {
 			if (event.getAuthor().getId().equals("245111504863494145") && msgContent.startsWith(prefix)
 					&& !event.getAuthor().isBot()) {
 				// We don't want to respond to other bot accounts, including ourself
-				if (prefix.length() > 1) {
 					msgContent = msgContent.substring(prefix.length());
-				} else {
-					// prefix of length 1
-					msgContent = msgContent.substring(1);
-				}
-				String msgFixed = msgContent;
+				
 				String[] msgSplice = msgContent.split(" ");
 				switch (msgSplice[0]) {
 				case "test":
@@ -61,7 +57,7 @@ public class MyListener extends ListenerAdapter {
 				// ---------------------------------------------------------banMatchCase-----------------------------------------------------------------------\\
 				case "banMatchCase": {
 					if (msgSplice.length > 2) {
-						String username = msgFixed.replace("banMatchCase ", "");
+						String username = msgSplice[2];
 						int counter = 0;
 						boolean matchCase = Boolean.valueOf(msgSplice[1]);
 						List<Member> bannable = guild.getMembersByName(username, matchCase);
@@ -83,7 +79,7 @@ public class MyListener extends ListenerAdapter {
 				case "banContains": {
 					if (msgSplice.length > 1) {
 						int counter = 0;
-						String username = msgFixed.replace("banContains ", "");
+						String username = msgSplice[2];
 						if (username.length() >= 5) {
 							List<Member> members = guild.getMembers();
 							for (Member member : members) {
@@ -146,7 +142,7 @@ public class MyListener extends ListenerAdapter {
 					break;
 				// -----------------------------------------------------setPrefix-------------------------------------------------------------------------\\
 				case "setPrefix":
-					prefix = msgFixed.replace("setPrefix ", "");
+					prefix = msgSplice[1];
 					// store somewhere to get later
 
 					break;
@@ -169,8 +165,7 @@ public class MyListener extends ListenerAdapter {
 												"Mass unban " + ts.toLocalDateTime().toString(), user.getUser().getId(),
 												user.getUser().getAsTag().replace("'", "")));
 							} catch (SQLException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
+								logger.trace("Invalid query constructed");
 							}
 
 						}
@@ -192,9 +187,8 @@ public class MyListener extends ListenerAdapter {
 								channel.sendMessage(reason);
 							}
 						} else {
-							userData = databaseConfigurator.getInfractions(uid, channel); // only sets infraction
-																							// points, infraction count,
-																							// and reasons
+							userData = databaseConfigurator.getInfractions(uid, channel); // only sets infraction points, infraction count,
+																						  // and reasons
 							userData.setTag(guild.getMemberById(uid).getUser().getAsTag());
 							userData.setDateJoined(convertToDate(guild.getMemberById(uid).getTimeJoined()));
 							for (String reason : userData.getReasons()) {
@@ -207,9 +201,6 @@ public class MyListener extends ListenerAdapter {
 
 						}
 
-						// add member to db as well if not already in there
-						// offer to infract user with reactions, need to be able to get msg just sent id
-						// then add reacts corresponding to punishment
 
 					} else {
 						channel.sendMessage(
@@ -220,7 +211,7 @@ public class MyListener extends ListenerAdapter {
 
 			}
 		} catch (SQLException e1) {
-			e1.printStackTrace();
+			logger.error(e1.getMessage());
 		} catch (NumberFormatException e) {
 			channel.sendMessage("Invalid ID constructed").queue();
 		} catch (ArrayIndexOutOfBoundsException ex) {
@@ -238,8 +229,9 @@ public class MyListener extends ListenerAdapter {
 		}
 	}
 	
+	
 
-	public static Date convertToDate(OffsetDateTime time) {
+	public static Date convertToDate(OffsetDateTime time) { //for the sake of making it more readable
 		return new Date(time.toInstant().toEpochMilli());
 	}
 
