@@ -15,7 +15,7 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import java.sql.*;
 //import java.time.Duration;
 //import java.time.Instant;
-
+//Todo: utilize a static initializer, refactor DB setup to include primary key on uid, use java Properties to load files and set values
 public class databaseConfigurator {
 	private String db_host;
 	private String db_port;
